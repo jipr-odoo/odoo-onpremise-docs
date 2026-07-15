@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firewall Configuration — Odoo On-Premise</title>
+  <meta name="description" content="Configure Oracle Cloud Security Lists and Linux iptables to expose only SSH, HTTP, and HTTPS while keeping port 8069 private.">
+  <script>(function(){var t=localStorage.getItem('odoo-docs-theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/code.css">
+  <link rel="stylesheet" href="../assets/css/dark.css">
+</head>
+<body>
+<header class="doc-header" role="banner">
+  <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <a class="header-brand" href="../index.html" aria-label="Odoo Docs Home"><svg class="brand-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#714B67"/><path d="M8 22V10h4.5a4.5 4.5 0 010 9H12v3H8zm4-5.5h.5a2 2 0 000-4H12v4z" fill="white"/><circle cx="21" cy="19" r="3.5" fill="white"/><path d="M19.5 10h3v7a3.5 3.5 0 01-3.5 3.5H19V10h.5z" fill="white" opacity="0.7"/></svg><span class="brand-title">Odoo On-Premise</span></a>
+  <span class="header-version"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>v18 · Ubuntu 24.04</span>
+  <div class="header-search"><div class="search-box" role="search"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" class="search-input" placeholder="Search docs… (/ or Ctrl+K)" aria-label="Search documentation" autocomplete="off" spellcheck="false"><div class="search-shortcut" aria-hidden="true"><kbd>/</kbd></div><div class="search-results" role="listbox" aria-label="Search results"></div></div></div>
+  <div class="header-actions"><button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode (D)"><svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div>
+</header>
+<div class="sidebar-backdrop" aria-hidden="true"></div>
+<div class="doc-shell">
+  <aside class="doc-sidebar" aria-label="Documentation navigation"></aside>
+  <div class="doc-content">
+    <div class="doc-content-inner">
+      <main class="doc-article" id="main-content">
+
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="../index.html">Home</a><span class="sep" aria-hidden="true">›</span>
+          <span>Deployment</span><span class="sep" aria-hidden="true">›</span>
+          <span class="current">Firewall</span>
+        </nav>
+
+        <header class="page-header">
+          <span class="page-category">Deployment · Chapter 8</span>
+          <h1>Firewall Configuration</h1>
+          <p class="page-description">
+            Secure the Oracle Cloud VM using two independent firewall layers: the Oracle Security List
+            (cloud-level) and Linux <code>iptables</code> (OS-level). Both must allow traffic for it to reach Nginx.
+          </p>
+          <div class="page-meta">
+            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Estimated time: 10–15 minutes</span>
+          </div>
+        </header>
+
+        <!-- Overview -->
+        <section id="overview">
+          <h2>Overview</h2>
+          <p>
+            Oracle Cloud instances are protected by two independent firewall layers that both
+            must allow a connection before traffic reaches your application.
+          </p>
+
+          <div class="diagram-container">
+            <svg viewBox="0 0 400 340" xmlns="http://www.w3.org/2000/svg" style="max-width:400px;width:100%" role="img" aria-label="Firewall layers diagram">
+              <defs>
+                <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/></marker>
+              </defs>
+              <rect x="50" y="10"  width="300" height="60" rx="10" fill="rgba(99,102,241,0.1)"  stroke="#6366f1" stroke-width="1.5"/>
+              <text x="200" y="38"  text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#4f46e5">🌐 Internet</text>
+              <text x="200" y="58"  text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#6366f1">Inbound traffic on any port</text>
+              <line x1="200" y1="72" x2="200" y2="95" stroke="#94a3b8" stroke-width="2" marker-end="url(#a2)" stroke-dasharray="4,2"/>
+              <rect x="50" y="98"  width="300" height="60" rx="10" fill="rgba(245,158,11,0.1)"  stroke="#f59e0b" stroke-width="1.5"/>
+              <text x="200" y="126" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#b45309">☁️ Oracle Security List</text>
+              <text x="200" y="146" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#d97706">Cloud-level ingress rules (22, 80, 443)</text>
+              <line x1="200" y1="160" x2="200" y2="183" stroke="#94a3b8" stroke-width="2" marker-end="url(#a2)" stroke-dasharray="4,2"/>
+              <rect x="50" y="186" width="300" height="60" rx="10" fill="rgba(239,68,68,0.1)"  stroke="#ef4444" stroke-width="1.5"/>
+              <text x="200" y="214" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#dc2626">🔥 Linux iptables</text>
+              <text x="200" y="234" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#ef4444">OS-level packet filter (22, 80, 443)</text>
+              <line x1="200" y1="248" x2="200" y2="271" stroke="#94a3b8" stroke-width="2" marker-end="url(#a2)" stroke-dasharray="4,2"/>
+              <rect x="50" y="274" width="300" height="56" rx="10" fill="rgba(113,75,103,0.1)" stroke="#714B67" stroke-width="1.5"/>
+              <text x="200" y="300" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#5c3d54">⚡ Nginx → Odoo</text>
+              <text x="200" y="320" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#714B67">Application layer (localhost only)</text>
+            </svg>
+            <p class="diagram-caption">Both firewall layers must be configured — one alone is not sufficient</p>
+          </div>
+
+          <div class="warning">
+            <strong>Both layers are required</strong>
+            <p>
+              Opening a port in only the Oracle Security List will still be blocked by <code>iptables</code>, and vice versa.
+              You must configure <em>both</em> layers for traffic to reach Nginx.
+            </p>
+          </div>
+        </section>
+
+        <!-- Required Ports -->
+        <section id="layers">
+          <h2>Required Ports</h2>
+          <p>Only three ports need to be publicly accessible. Port 8069 must remain private.</p>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr><th>Port</th><th>Protocol</th><th>Purpose</th><th>Public?</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>22</strong></td><td>TCP</td>
+                  <td>SSH remote access</td>
+                  <td><span class="badge badge-success">Yes</span></td>
+                </tr>
+                <tr>
+                  <td><strong>80</strong></td><td>TCP</td>
+                  <td>HTTP — Let's Encrypt challenge &amp; permanent redirect to HTTPS</td>
+                  <td><span class="badge badge-success">Yes</span></td>
+                </tr>
+                <tr>
+                  <td><strong>443</strong></td><td>TCP</td>
+                  <td>HTTPS — all Odoo traffic</td>
+                  <td><span class="badge badge-success">Yes</span></td>
+                </tr>
+                <tr>
+                  <td><strong>8069</strong></td><td>TCP</td>
+                  <td>Odoo HTTP server (internal only)</td>
+                  <td><span class="badge badge-neutral" style="background:var(--clr-danger-bg);color:var(--clr-danger);border-color:var(--clr-danger)">Never</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="tip">
+            <strong>Tip</strong>
+            <p>
+              After Nginx is configured, verify that Odoo only listens on loopback:
+              <code>sudo ss -tlnp | grep 8069</code> — the local address must be
+              <code>127.0.0.1:8069</code>, never <code>0.0.0.0:8069</code>.
+            </p>
+          </div>
+        </section>
+
+        <!-- Oracle Security List -->
+        <section id="oracle">
+          <h2>Oracle Cloud Security List</h2>
+          <p>
+            In the Oracle Cloud Console, navigate to <strong>Networking → Virtual Cloud Networks →
+            your VCN → Security Lists → Default Security List</strong> and add the following
+            <strong>Ingress Rules</strong>.
+          </p>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Source CIDR</th><th>IP Protocol</th><th>Destination Port</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>0.0.0.0/0</code></td><td>TCP</td><td>22</td><td>SSH</td></tr>
+                <tr><td><code>0.0.0.0/0</code></td><td>TCP</td><td>80</td><td>HTTP / Let's Encrypt</td></tr>
+                <tr><td><code>0.0.0.0/0</code></td><td>TCP</td><td>443</td><td>HTTPS</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="warning">
+            <strong>Do not add an ingress rule for port 8069</strong>
+            <p>Never create a public ingress rule for TCP 8069. Odoo's built-in HTTP server is not hardened for direct Internet exposure.</p>
+          </div>
+
+          <div class="note">
+            <strong>IPv6</strong>
+            <p>If your VM has a public IPv6 address, add the same rules with source CIDR <code>::/0</code> for each port.</p>
+          </div>
+        </section>
+
+        <!-- iptables -->
+        <section id="iptables">
+          <h2>Linux Firewall (iptables)</h2>
+          <p>
+            Ubuntu 24.04 uses <code>iptables</code> as its packet filter. Oracle Cloud VM images
+            ship with a pre-loaded <code>iptables</code> ruleset that blocks most inbound traffic
+            by default. You must explicitly allow the required ports.
+          </p>
+
+          <h3>Allow HTTP and HTTPS</h3>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo iptables -I INPUT -p tcp --dport 80  -j ACCEPT
+sudo iptables -I INPUT -p tcp --dport 443 -j ACCEPT</pre></div>
+
+          <p>SSH (port 22) is typically already allowed by the default Oracle ruleset. Verify with:</p>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo iptables -L INPUT -n --line-numbers</pre></div>
+
+          <h3>Persist the Rules</h3>
+          <p>
+            <code>iptables</code> rules are not persistent by default. Save them so they survive
+            a reboot.
+          </p>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo apt install -y iptables-persistent
+
+sudo iptables-save | sudo tee /etc/iptables/rules.v4 > /dev/null</pre></div>
+
+          <div class="note">
+            <strong>Verify after reboot</strong>
+            <p>
+              After saving rules, reboot the server once to confirm the firewall configuration
+              survives a restart:
+              <code>sudo reboot</code>. Then reconnect and re-check with
+              <code>sudo iptables -L INPUT -n --line-numbers</code>.
+            </p>
+          </div>
+        </section>
+
+        <!-- Verification -->
+        <section id="verify">
+          <h2>Verification</h2>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo ss -tlnp
+
+curl -I http://127.0.0.1
+
+curl -Ik https://example.com</pre></div>
+
+          <ul class="verify-list">
+            <li><span class="tick">✓</span> SSH (port 22) is reachable</li>
+            <li><span class="tick">✓</span> HTTP (port 80) returns a response from Nginx</li>
+            <li><span class="tick">✓</span> HTTPS (port 443) returns a valid TLS response</li>
+            <li><span class="tick">✓</span> Port 8069 is <strong>not</strong> accessible from outside the server</li>
+            <li><span class="tick">✓</span> <code>iptables</code> rules are saved and survive a reboot</li>
+          </ul>
+        </section>
+
+        <!-- Troubleshooting -->
+        <section id="troubleshooting">
+          <h2>Common Issues</h2>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Problem</th><th>Likely Cause</th><th>Resolution</th></tr></thead>
+              <tbody>
+                <tr><td>Connection timed out on port 80 or 443</td><td>Port blocked in one or both firewall layers</td><td>Check the Oracle Security List ingress rules and <code>sudo iptables -L INPUT -n</code></td></tr>
+                <tr><td>HTTPS not reachable, HTTP works</td><td>Port 443 not opened in <code>iptables</code></td><td>Run <code>sudo iptables -I INPUT -p tcp --dport 443 -j ACCEPT</code> and save</td></tr>
+                <tr><td>Rules disappear after reboot</td><td><code>iptables</code> rules not persisted</td><td>Install <code>iptables-persistent</code> and save rules with <code>iptables-save</code></td></tr>
+                <tr><td>Port 8069 accessible from Internet</td><td>Incorrect Oracle Security List rule</td><td>Delete the ingress rule for TCP 8069 from the Oracle Security List</td></tr>
+                <tr><td>Odoo listens on <code>0.0.0.0:8069</code></td><td><code>http_interface</code> not set</td><td>Set <code>http_interface = 127.0.0.1</code> in <code>/etc/odoo/odoo.conf</code> and restart Odoo</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="warning">
+            <strong>Recommended production firewall posture</strong>
+            <ul>
+              <li>TCP 22 → SSH (restrict to known IPs if possible)</li>
+              <li>TCP 80 → HTTP (Let's Encrypt challenge + redirect)</li>
+              <li>TCP 443 → HTTPS (Odoo)</li>
+              <li>All other inbound ports → <strong>BLOCKED</strong></li>
+            </ul>
+          </div>
+        </section>
+
+        <nav class="page-nav" aria-label="Chapter navigation">
+          <a class="page-nav-item prev" href="https.html"><span class="nav-label">← Previous</span><span class="nav-title">HTTPS &amp; TLS</span></a>
+          <a class="page-nav-item next" href="helper-commands.html"><span class="nav-label">Next →</span><span class="nav-title">Helper Commands</span></a>
+        </nav>
+        <a class="back-to-top" href="#main-content"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>Back to top</a>
+
+      </main>
+      <div class="doc-toc-column" aria-label="Page table of contents"></div>
+    </div>
+  </div>
+</div>
+<script src="../assets/js/darkmode.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/search.js"></script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

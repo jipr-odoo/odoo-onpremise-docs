@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Server Preparation &amp; PostgreSQL — Odoo On-Premise</title>
+  <meta name="description" content="Update Ubuntu 24.04, install system dependencies, set up PostgreSQL, create the Odoo database user, and prepare the directory structure.">
+  <script>(function(){var t=localStorage.getItem('odoo-docs-theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/code.css">
+  <link rel="stylesheet" href="../assets/css/dark.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+
+<header class="doc-header" role="banner">
+  <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <a class="header-brand" href="../index.html" aria-label="Odoo Docs Home">
+    <svg class="brand-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#714B67"/><path d="M8 22V10h4.5a4.5 4.5 0 010 9H12v3H8zm4-5.5h.5a2 2 0 000-4H12v4z" fill="white"/><circle cx="21" cy="19" r="3.5" fill="white"/><path d="M19.5 10h3v7a3.5 3.5 0 01-3.5 3.5H19V10h.5z" fill="white" opacity="0.7"/></svg>
+    <span class="brand-title">Odoo On-Premise</span>
+  </a>
+  <span class="header-version"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>v18 · Ubuntu 24.04</span>
+  <div class="header-search">
+    <div class="search-box" role="search">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" class="search-input" placeholder="Search docs… (/ or Ctrl+K)" aria-label="Search documentation" autocomplete="off" spellcheck="false">
+      <div class="search-shortcut" aria-hidden="true"><kbd>/</kbd></div>
+      <div class="search-results" role="listbox" aria-label="Search results"></div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode (D)">
+      <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="sidebar-backdrop" aria-hidden="true"></div>
+
+<div class="doc-shell">
+  <aside class="doc-sidebar" aria-label="Documentation navigation"></aside>
+
+  <div class="doc-content">
+    <div class="doc-content-inner">
+      <main class="doc-article" id="main-content">
+
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="../index.html">Home</a>
+          <span class="sep" aria-hidden="true">›</span>
+          <span>Deployment</span>
+          <span class="sep" aria-hidden="true">›</span>
+          <span class="current">Server &amp; PostgreSQL</span>
+        </nav>
+
+        <header class="page-header">
+          <span class="page-category">Deployment · Chapter 1</span>
+          <h1>Server Preparation &amp; PostgreSQL</h1>
+          <p class="page-description">
+            Update Ubuntu 24.04, install system dependencies, set up PostgreSQL, create the Odoo database user,
+            and establish the recommended directory layout.
+          </p>
+          <div class="page-meta">
+            <span class="meta-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Estimated time: 10–15 minutes
+            </span>
+            <span class="meta-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+              Oracle VM · SSH access required
+            </span>
+          </div>
+        </header>
+
+        <!-- Overview -->
+        <section id="overview">
+          <h2>Overview</h2>
+          <p>
+            This chapter starts immediately after your Oracle Cloud VM is created and reachable via SSH,
+            running Ubuntu 24.04 LTS. By the end of this chapter, your server will have a clean package
+            baseline, PostgreSQL installed and running, and a dedicated directory structure for Odoo.
+          </p>
+
+          <div class="note">
+            <strong>Prerequisites</strong>
+            <ul>
+              <li>Oracle Cloud VM running Ubuntu 24.04 LTS</li>
+              <li>SSH access to the VM</li>
+              <li>A user account with <code>sudo</code> privileges</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Packages -->
+        <section id="packages">
+          <h2>Install Required Packages</h2>
+
+          <p>Start by updating the package index and upgrading all installed packages to ensure a clean, secure baseline.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo apt update
+sudo apt upgrade -y</pre></div>
+
+          <div class="tip">
+            <strong>Tip</strong>
+            <p>Run <code>sudo reboot</code> if the kernel or critical system libraries were upgraded. Reconnect via SSH after the reboot completes.</p>
+          </div>
+
+          <p>Install all build dependencies that Odoo's Python packages require during compilation.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo apt install -y \
+    git python3 python3-venv python3-pip \
+    build-essential gcc g++ \
+    libxml2-dev libxslt1-dev \
+    libldap2-dev libsasl2-dev \
+    libpq-dev libjpeg-dev zlib1g-dev \
+    node-less npm</pre></div>
+
+          <div class="note">
+            <strong>Why these packages?</strong>
+            <p>
+              Packages like <code>libxml2-dev</code>, <code>libldap2-dev</code> and <code>libpq-dev</code>
+              are C-level headers required to compile Python wheels for <code>lxml</code>, <code>python-ldap</code>
+              and <code>psycopg2</code>. Without them, <code>pip install</code> will fail during the Odoo setup step.
+            </p>
+          </div>
+        </section>
+
+        <!-- PostgreSQL -->
+        <section id="postgres">
+          <h2>Install PostgreSQL</h2>
+
+          <p>Install PostgreSQL from the official Ubuntu repositories.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo apt install -y postgresql</pre></div>
+
+          <p>Verify that the service started correctly.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo systemctl status postgresql --no-pager</pre></div>
+
+          <h3>Create the Odoo Database User</h3>
+
+          <p>
+            Create a dedicated PostgreSQL role named <code>odoo</code>. This role has permission to create
+            databases (required so Odoo can create and manage its own database), but is not a superuser.
+          </p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo -u postgres createuser -d -R -S odoo</pre></div>
+
+          <div class="note">
+            <strong>Flag reference</strong>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr><th>Flag</th><th>Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>-d</code></td><td>Allow the role to create databases</td></tr>
+                <tr><td><code>-R</code></td><td>Prevent the role from creating other roles</td></tr>
+                <tr><td><code>-S</code></td><td>Not a superuser</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="warning">
+            <strong>Security: local socket authentication</strong>
+            <p>
+              This guide intentionally uses <strong>local peer authentication</strong> via Unix sockets.
+              Odoo connects to PostgreSQL through a socket, not over TCP/IP, so no password needs to be
+              stored in <code>odoo.conf</code>. <strong>Never expose PostgreSQL directly to the Internet.</strong>
+            </p>
+          </div>
+        </section>
+
+        <!-- Directory layout -->
+        <section id="directories">
+          <h2>Recommended Directory Layout</h2>
+
+          <p>
+            Create a clean, self-contained directory at <code>/opt/odoo</code> that will hold all Odoo-related files.
+            Keeping everything under a single directory makes backups, upgrades, and permission management straightforward.
+          </p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo mkdir -p /opt/odoo/{community,enterprise,custom,logs,venv}
+sudo chown -R odoo:odoo /opt/odoo</pre></div>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">tree</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>/opt/odoo/
+├── community/   ← Odoo Community source (git clone)
+├── enterprise/  ← Odoo Enterprise source (git clone)
+├── custom/      ← Your custom addons
+├── logs/        ← Odoo log files
+└── venv/        ← Python virtual environment</pre></div>
+
+          <div class="tip">
+            <strong>Best practice</strong>
+            <p>
+              Keeping custom modules outside the Community and Enterprise repositories makes upgrades much easier.
+              You can pull the latest Community/Enterprise code without touching your customizations.
+            </p>
+          </div>
+        </section>
+
+        <!-- Verification -->
+        <section id="verify">
+          <h2>Verification</h2>
+
+          <p>Before proceeding to the next chapter, confirm the following.</p>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Check</th><th>Command</th><th>Expected Result</th></tr></thead>
+              <tbody>
+                <tr><td>Ubuntu updated</td><td><code>uname -r</code></td><td>Current kernel version</td></tr>
+                <tr><td>Dependencies installed</td><td><code>python3 --version</code></td><td>Python 3.x.x</td></tr>
+                <tr><td>PostgreSQL running</td><td><code>sudo systemctl is-active postgresql</code></td><td><code>active</code></td></tr>
+                <tr><td>Odoo DB user created</td><td><code>sudo -u postgres psql -c "\du odoo"</code></td><td>Role listed</td></tr>
+                <tr><td>Directory created</td><td><code>ls /opt/odoo</code></td><td>community, enterprise, custom, logs, venv</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <ul class="verify-list">
+            <li><span class="tick">✓</span> Ubuntu updated and optionally rebooted</li>
+            <li><span class="tick">✓</span> System dependencies installed without errors</li>
+            <li><span class="tick">✓</span> PostgreSQL is running</li>
+            <li><span class="tick">✓</span> <code>odoo</code> PostgreSQL role exists</li>
+            <li><span class="tick">✓</span> <code>/opt/odoo</code> directory structure created</li>
+          </ul>
+
+          <div class="note">
+            <strong>Next step</strong>
+            <p>The next chapter covers cloning the Community and Enterprise repositories, creating the Python virtual environment, and installing all Python dependencies.</p>
+          </div>
+        </section>
+
+        <!-- Page navigation -->
+        <nav class="page-nav" aria-label="Chapter navigation">
+          <a class="page-nav-item prev" href="../index.html">
+            <span class="nav-label">← Previous</span>
+            <span class="nav-title">Home</span>
+          </a>
+          <a class="page-nav-item next" href="odoo.html">
+            <span class="nav-label">Next →</span>
+            <span class="nav-title">Install Odoo</span>
+          </a>
+        </nav>
+
+        <a class="back-to-top" href="#main-content">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>
+          Back to top
+        </a>
+
+      </main>
+      <div class="doc-toc-column" aria-label="Page table of contents"></div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/darkmode.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/search.js"></script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

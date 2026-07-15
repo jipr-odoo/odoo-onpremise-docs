@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Troubleshooting — Odoo On-Premise</title>
+  <meta name="description" content="Solutions for common Odoo on-premise deployment problems including DNS, Nginx 502, Enterprise modules, HTTPS challenges, firewall, systemd, and memory limits.">
+  <script>(function(){var t=localStorage.getItem('odoo-docs-theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/code.css">
+  <link rel="stylesheet" href="../assets/css/dark.css">
+</head>
+<body>
+<header class="doc-header" role="banner">
+  <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <a class="header-brand" href="../index.html" aria-label="Odoo Docs Home"><svg class="brand-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#714B67"/><path d="M8 22V10h4.5a4.5 4.5 0 010 9H12v3H8zm4-5.5h.5a2 2 0 000-4H12v4z" fill="white"/><circle cx="21" cy="19" r="3.5" fill="white"/><path d="M19.5 10h3v7a3.5 3.5 0 01-3.5 3.5H19V10h.5z" fill="white" opacity="0.7"/></svg><span class="brand-title">Odoo On-Premise</span></a>
+  <span class="header-version"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>v18 · Ubuntu 24.04</span>
+  <div class="header-search"><div class="search-box" role="search"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" class="search-input" placeholder="Search docs… (/ or Ctrl+K)" aria-label="Search documentation" autocomplete="off" spellcheck="false"><div class="search-shortcut" aria-hidden="true"><kbd>/</kbd></div><div class="search-results" role="listbox" aria-label="Search results"></div></div></div>
+  <div class="header-actions"><button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode (D)"><svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div>
+</header>
+<div class="sidebar-backdrop" aria-hidden="true"></div>
+<div class="doc-shell">
+  <aside class="doc-sidebar" aria-label="Documentation navigation"></aside>
+  <div class="doc-content">
+    <div class="doc-content-inner">
+      <main class="doc-article" id="main-content">
+
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="../index.html">Home</a><span class="sep" aria-hidden="true">›</span>
+          <span>Administration</span><span class="sep" aria-hidden="true">›</span>
+          <span class="current">Troubleshooting</span>
+        </nav>
+
+        <header class="page-header">
+          <span class="page-category">Administration</span>
+          <h1>Troubleshooting Guide</h1>
+          <p class="page-description">
+            Reference solutions for the most common problems encountered during and after an Odoo
+            on-premise deployment on Oracle Cloud. Start with the diagnostic commands, then
+            match your symptom to the relevant section.
+          </p>
+        </header>
+
+        <!-- General diagnostics -->
+        <section id="diagnostics">
+          <h2>General Diagnostics</h2>
+          <p>When something goes wrong, start with these commands to identify which component is the problem.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre># Check all key services at once
+sudo systemctl status odoo postgresql nginx --no-pager
+
+# View recent Odoo logs
+journalctl -u odoo -n 100 --no-pager
+
+# Check which processes are listening on which ports
+sudo ss -tlnp
+
+# Check Nginx configuration validity
+sudo nginx -t</pre></div>
+        </section>
+
+        <!-- DNS -->
+        <section id="dns">
+          <h2>DNS Problems</h2>
+          <p>DNS issues are the most common cause of a failed Let's Encrypt challenge and connection timeouts when first setting up the domain.</p>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Symptom</th><th>Likely Cause</th><th>Resolution</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>Registrar parking page appears instead of Odoo</td>
+                  <td>Registrar's default DNS records still active</td>
+                  <td>Delete all default A and CNAME records from your registrar, then add your own A record pointing to the Oracle VM IP</td>
+                </tr>
+                <tr>
+                  <td>Different devices resolve to different IP addresses</td>
+                  <td>DNS cache not yet expired</td>
+                  <td>Test with <code>dig @8.8.8.8 example.com</code> to bypass local cache. Wait for the TTL to expire.</td>
+                </tr>
+                <tr>
+                  <td>HTTP 404 after pointing DNS correctly</td>
+                  <td>Nginx <code>server_name</code> does not match the domain</td>
+                  <td>Edit <code>/etc/nginx/sites-available/odoo</code> and ensure <code>server_name</code> matches your domain exactly, then <code>sudo nginx -t &amp;&amp; sudo systemctl reload nginx</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre># Test with a specific DNS resolver to bypass cache
+dig @8.8.8.8 +short example.com
+dig @1.1.1.1 +short example.com</pre></div>
+        </section>
+
+        <!-- Nginx -->
+        <section id="nginx">
+          <h2>Nginx Problems</h2>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo nginx -t
+sudo systemctl status nginx --no-pager
+sudo journalctl -u nginx -n 50 --no-pager
+sudo cat /var/log/nginx/error.log | tail -50</pre></div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Problem</th><th>Cause</th><th>Resolution</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>Default Nginx welcome page appears</td>
+                  <td>Default site is still enabled</td>
+                  <td><code>sudo rm /etc/nginx/sites-enabled/default</code> and reload Nginx</td>
+                </tr>
+                <tr>
+                  <td>502 Bad Gateway</td>
+                  <td>Odoo is not running or is not listening on port 8069</td>
+                  <td>Run <code>sudo systemctl status odoo</code> and check <code>sudo ss -tlnp | grep 8069</code></td>
+                </tr>
+                <tr>
+                  <td>WebSocket errors / live chat not working</td>
+                  <td>Missing <code>Upgrade</code> and <code>Connection</code> proxy headers</td>
+                  <td>Verify the <code>/websocket</code> location block in the Nginx config includes <code>proxy_http_version 1.1</code> and the <code>Upgrade</code>/<code>Connection</code> headers</td>
+                </tr>
+                <tr>
+                  <td>413 Request Entity Too Large on uploads</td>
+                  <td><code>client_max_body_size</code> is too low</td>
+                  <td>Set <code>client_max_body_size 100M;</code> (or higher) in the Nginx server block</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Enterprise -->
+        <section id="enterprise">
+          <h2>Enterprise Modules Missing</h2>
+          <p>If Odoo starts but you only see Community modules in the app list, or the Enterprise features are absent, check the following.</p>
+
+          <ol>
+            <li>Verify <code>addons_path</code> in <code>/etc/odoo/odoo.conf</code> includes the path to the Enterprise repository:<br><code>addons_path = /opt/odoo/community/addons,/opt/odoo/custom,/opt/odoo/enterprise</code></li>
+            <li>Confirm the Enterprise directory is not empty: <code>ls /opt/odoo/enterprise/</code></li>
+            <li>Ensure both repositories are on the same branch: <code>cd /opt/odoo/enterprise &amp;&amp; git branch</code></li>
+            <li>Restart Odoo after any <code>addons_path</code> change: <code>sudo systemctl restart odoo</code></li>
+          </ol>
+
+          <div class="warning">
+            <strong>Database created before Enterprise was configured</strong>
+            <p>
+              If the Odoo database was created before the Enterprise repository was added to
+              <code>addons_path</code>, you may need to update the module list from the Odoo UI
+              (Settings → Technical → Update Module List) or recreate the database.
+            </p>
+          </div>
+        </section>
+
+        <!-- HTTPS -->
+        <section id="certbot">
+          <h2>HTTPS / Certbot Issues</h2>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Problem</th><th>Resolution</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>ACME challenge failed</td>
+                  <td>Confirm DNS resolves to the VM and port 80 is reachable from the Internet. Run <code>curl -I http://example.com</code> from an external machine.</td>
+                </tr>
+                <tr>
+                  <td>HTTPS connection times out</td>
+                  <td>Open TCP 443 in the Oracle Security List <em>and</em> in iptables: <code>sudo iptables -I INPUT -p tcp --dport 443 -j ACCEPT</code></td>
+                </tr>
+                <tr>
+                  <td>Certificate not renewing automatically</td>
+                  <td>Check <code>sudo systemctl status certbot.timer</code>. Run a dry-run: <code>sudo certbot renew --dry-run</code></td>
+                </tr>
+                <tr>
+                  <td>Too many failed attempts — rate limited</td>
+                  <td>Wait at least 1 hour. Use <code>--staging</code> flag during testing: <code>sudo certbot --nginx --staging</code></td>
+                </tr>
+                <tr>
+                  <td>Browser still shows HTTP (no padlock)</td>
+                  <td>Clear browser cache. Verify the HTTP→HTTPS redirect in the Nginx config: look for a <code>return 301 https://</code> directive.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Firewall -->
+        <section id="firewall">
+          <h2>Firewall Issues</h2>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo iptables -L INPUT -n --line-numbers
+sudo ss -tlnp</pre></div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Problem</th><th>Resolution</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>Port 80 or 443 connection times out</td>
+                  <td>Check both the Oracle Security List (cloud console) <em>and</em> iptables. Both must allow the port.</td>
+                </tr>
+                <tr>
+                  <td>Rules disappear after reboot</td>
+                  <td>Install <code>iptables-persistent</code> and run <code>sudo iptables-save | sudo tee /etc/iptables/rules.v4</code></td>
+                </tr>
+                <tr>
+                  <td>Port 8069 accessible from Internet</td>
+                  <td>Delete the ingress rule for TCP 8069 from the Oracle Security List. Ensure <code>http_interface = 127.0.0.1</code> in <code>odoo.conf</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="warning">
+            <strong>Keep port 8069 private at all times</strong>
+            <p>Publicly exposing port 8069 bypasses Nginx, disables HTTPS encryption, and exposes Odoo directly to the Internet — this is a serious security risk.</p>
+          </div>
+        </section>
+
+        <!-- systemd -->
+        <section id="systemd">
+          <h2>Odoo Service Won't Start</h2>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo systemctl status odoo --no-pager
+journalctl -u odoo -n 100 --no-pager</pre></div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Error in Logs</th><th>Cause</th><th>Resolution</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>No such file or directory</code> for ExecStart</td>
+                  <td>Incorrect path to Python or odoo-bin</td>
+                  <td>Verify the paths: <code>ls /opt/odoo/venv/bin/python3</code> and <code>ls /opt/odoo/community/odoo-bin</code></td>
+                </tr>
+                <tr>
+                  <td><code>Permission denied</code></td>
+                  <td>Files not owned by the <code>odoo</code> user</td>
+                  <td><code>sudo chown -R odoo:odoo /opt/odoo /etc/odoo</code></td>
+                </tr>
+                <tr>
+                  <td><code>ModuleNotFoundError</code></td>
+                  <td>Python dependencies not installed in the venv, or wrong interpreter</td>
+                  <td>Confirm ExecStart uses the venv Python, then <code>sudo -u odoo /opt/odoo/venv/bin/pip install -r /opt/odoo/community/requirements.txt</code></td>
+                </tr>
+                <tr>
+                  <td>PostgreSQL connection refused</td>
+                  <td>PostgreSQL not running or wrong DB user</td>
+                  <td><code>sudo systemctl start postgresql</code> and verify the <code>odoo</code> role: <code>sudo -u postgres psql -c "\du odoo"</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Memory -->
+        <section id="memory">
+          <h2>Memory Limit Warnings</h2>
+          <p>
+            On small Oracle Cloud Free Tier instances (1 GB RAM), Odoo workers may be killed
+            when they exceed the configured memory limits. This appears in the log as:
+          </p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>tail -100 /opt/odoo/logs/odoo.log | grep -i "memory\|killed\|limit"</pre></div>
+
+          <p><strong>Symptoms:</strong> Odoo restarts unexpectedly, pages time out, or you see <em>Worker exceeded memory limit</em> in the logs.</p>
+
+          <p><strong>Solutions:</strong></p>
+          <ol>
+            <li>Reduce active background tasks and installed apps to lower memory usage.</li>
+            <li>If more RAM is available, increase limits in <code>odoo.conf</code>:
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>limit_memory_soft = 671088640   # 640 MB
+limit_memory_hard = 1073741824  # 1 GB</pre></div>
+            </li>
+            <li>For very small VMs, keep <code>workers = 0</code> (single-threaded mode) to minimize overhead.</li>
+          </ol>
+
+          <div class="tip">
+            <strong>Monitor memory usage</strong>
+            <p>Use <code>free -h</code> to check available RAM and <code>htop</code> or <code>ps aux --sort=-%mem | head -10</code> to identify memory-heavy processes.</p>
+          </div>
+        </section>
+
+        <nav class="page-nav" aria-label="Chapter navigation">
+          <a class="page-nav-item prev" href="helper-commands.html"><span class="nav-label">← Previous</span><span class="nav-title">Helper Commands</span></a>
+          <a class="page-nav-item next" href="appendix.html"><span class="nav-label">Next →</span><span class="nav-title">Appendix</span></a>
+        </nav>
+        <a class="back-to-top" href="#main-content"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>Back to top</a>
+
+      </main>
+      <div class="doc-toc-column" aria-label="Page table of contents"></div>
+    </div>
+  </div>
+</div>
+<script src="../assets/js/darkmode.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/search.js"></script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domain Configuration — Odoo On-Premise</title>
+  <meta name="description" content="Configure DNS A and CNAME records to point your domain to your Oracle Cloud VM public IP address before enabling HTTPS.">
+  <script>(function(){var t=localStorage.getItem('odoo-docs-theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/code.css">
+  <link rel="stylesheet" href="../assets/css/dark.css">
+</head>
+<body>
+<header class="doc-header" role="banner">
+  <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <a class="header-brand" href="../index.html" aria-label="Odoo Docs Home"><svg class="brand-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#714B67"/><path d="M8 22V10h4.5a4.5 4.5 0 010 9H12v3H8zm4-5.5h.5a2 2 0 000-4H12v4z" fill="white"/><circle cx="21" cy="19" r="3.5" fill="white"/><path d="M19.5 10h3v7a3.5 3.5 0 01-3.5 3.5H19V10h.5z" fill="white" opacity="0.7"/></svg><span class="brand-title">Odoo On-Premise</span></a>
+  <span class="header-version"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>v18 · Ubuntu 24.04</span>
+  <div class="header-search"><div class="search-box" role="search"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" class="search-input" placeholder="Search docs… (/ or Ctrl+K)" aria-label="Search documentation" autocomplete="off" spellcheck="false"><div class="search-shortcut" aria-hidden="true"><kbd>/</kbd></div><div class="search-results" role="listbox" aria-label="Search results"></div></div></div>
+  <div class="header-actions"><button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode (D)"><svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div>
+</header>
+<div class="sidebar-backdrop" aria-hidden="true"></div>
+<div class="doc-shell">
+  <aside class="doc-sidebar" aria-label="Documentation navigation"></aside>
+  <div class="doc-content">
+    <div class="doc-content-inner">
+      <main class="doc-article" id="main-content">
+
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="../index.html">Home</a><span class="sep" aria-hidden="true">›</span>
+          <span>Deployment</span><span class="sep" aria-hidden="true">›</span>
+          <span class="current">Domain</span>
+        </nav>
+
+        <header class="page-header">
+          <span class="page-category">Deployment · Chapter 6</span>
+          <h1>Configure Your Domain</h1>
+          <p class="page-description">Create DNS records that point your domain to the Oracle Cloud VM public IP address. DNS propagation must be complete before requesting an SSL certificate.</p>
+          <div class="page-meta">
+            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Estimated time: 5–30 minutes (varies with DNS propagation)</span>
+          </div>
+        </header>
+
+        <section id="overview">
+          <h2>Overview</h2>
+          <p>Before requesting a TLS certificate from Let's Encrypt, your domain must resolve to the public IP address of your Oracle Cloud VM. Let's Encrypt performs an HTTP challenge to verify that you control the domain, which requires DNS to be correctly configured first.</p>
+
+          <div class="note">
+            <strong>Before you begin</strong>
+            <p>Replace all occurrences of <code>example.com</code> and <code>203.0.113.10</code> in this guide with your own domain name and the actual public IP of your Oracle VM.</p>
+          </div>
+        </section>
+
+        <section id="dns">
+          <h2>Create DNS Records</h2>
+          <p>Log in to your domain registrar or DNS provider and add the following records.</p>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Type</th><th>Host / Name</th><th>Value</th><th>TTL</th></tr></thead>
+              <tbody>
+                <tr><td><strong>A</strong></td><td><code>@</code> (root domain)</td><td><code>203.0.113.10</code> (your VM IP)</td><td>300–3600</td></tr>
+                <tr><td><strong>CNAME</strong></td><td><code>www</code></td><td><code>example.com</code></td><td>300–3600</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="tip">
+            <strong>Remove parking records first</strong>
+            <p>Many registrars pre-configure parking A records or CNAME records that redirect to their own servers. Delete all existing A and CNAME records before adding your own to avoid conflicts.</p>
+          </div>
+        </section>
+
+        <section id="verify">
+          <h2>Verify DNS Resolution</h2>
+          <p>After saving your records, use the following commands to check whether the domain resolves correctly. You can run these from any Linux machine.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>dig +short example.com
+
+host example.com
+
+nslookup example.com</pre></div>
+
+          <p>All commands should return the Oracle VM public IP address.</p>
+
+          <h3>Verify HTTP Access</h3>
+          <p>Once DNS resolves correctly, confirm that Nginx is serving requests for the domain over HTTP.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>curl -I http://example.com</pre></div>
+
+          <p>A successful response will return an Odoo login page (HTTP 200 or 303 redirect). If you get a connection timeout, check the firewall configuration in Chapter 8.</p>
+        </section>
+
+        <section id="propagation">
+          <h2>DNS Propagation</h2>
+          <p>DNS changes are not instant. After you save your records, it can take anywhere from a few minutes to several hours for the changes to propagate across all resolvers.</p>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>DNS Provider</th><th>Typical Propagation Time</th></tr></thead>
+              <tbody>
+                <tr><td>Cloudflare</td><td>Usually &lt; 1 minute</td></tr>
+                <tr><td>Google Cloud DNS</td><td>Usually a few minutes</td></tr>
+                <tr><td>Route 53 (AWS)</td><td>Usually a few minutes</td></tr>
+                <tr><td>Generic registrar DNS</td><td>15 minutes – several hours</td></tr>
+                <tr><td>Local ISP resolvers</td><td>Up to 24 hours (due to TTL caching)</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="warning">
+            <strong>Do not request a certificate until DNS propagates</strong>
+            <p>If you run Certbot before DNS is correct, the ACME challenge will fail. Let's Encrypt enforces rate limits, and repeated failures can temporarily block you from requesting certificates for the same domain.</p>
+          </div>
+
+          <p>To test using a specific resolver (bypassing your local cache):</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>dig @8.8.8.8 +short example.com
+
+dig @1.1.1.1 +short example.com</pre></div>
+        </section>
+
+        <section id="issues">
+          <h2>Common Issues</h2>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Symptom</th><th>Likely Cause</th><th>Resolution</th></tr></thead>
+              <tbody>
+                <tr><td>Registrar parking page</td><td>Old default DNS records still active</td><td>Delete the registrar's default A/CNAME records and wait for TTL to expire</td></tr>
+                <tr><td>404 or wrong site from Nginx</td><td>Incorrect <code>server_name</code> in Nginx</td><td>Verify <code>server_name</code> matches your domain exactly, then reload Nginx</td></tr>
+                <tr><td>Connection timeout on port 80</td><td>Firewall blocking HTTP</td><td>Open TCP 80 in the Oracle Security List and in iptables (see Chapter 8)</td></tr>
+                <tr><td>Different IP on different devices</td><td>Cached DNS response</td><td>Wait for TTL to expire, or test via <code>dig @8.8.8.8</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <nav class="page-nav" aria-label="Chapter navigation">
+          <a class="page-nav-item prev" href="nginx.html"><span class="nav-label">← Previous</span><span class="nav-title">Nginx</span></a>
+          <a class="page-nav-item next" href="https.html"><span class="nav-label">Next →</span><span class="nav-title">HTTPS &amp; TLS</span></a>
+        </nav>
+        <a class="back-to-top" href="#main-content"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>Back to top</a>
+
+      </main>
+      <div class="doc-toc-column" aria-label="Page table of contents"></div>
+    </div>
+  </div>
+</div>
+<script src="../assets/js/darkmode.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/search.js"></script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

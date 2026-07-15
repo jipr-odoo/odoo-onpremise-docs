@@ -1,0 +1,77 @@
+<svg viewBox="0 0 520 580" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Architecture diagram showing the request flow from Internet through HTTPS, Nginx, Odoo, to PostgreSQL">
+  <defs>
+    <linearGradient id="grad-internet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="grad-nginx" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="grad-odoo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#714B67" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#9b7a97" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="grad-pg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.05"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="520" height="580" fill="transparent"/>
+
+  <!-- Internet box -->
+  <rect x="60" y="20" width="400" height="90" rx="12" fill="url(#grad-internet)" stroke="#6366f1" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="260" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#4f46e5">🌐 Internet</text>
+  <text x="260" y="72" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#6366f1">HTTPS :443 (public)</text>
+  <text x="260" y="90" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#6366f1">HTTP :80 (redirect + Let's Encrypt)</text>
+
+  <!-- Arrow 1 -->
+  <line x1="260" y1="113" x2="260" y2="147" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)" stroke-dasharray="5,3"/>
+  <text x="280" y="133" font-family="Inter,sans-serif" font-size="10" fill="#94a3b8">TLS</text>
+
+  <!-- Oracle Security List badge -->
+  <rect x="170" y="118" width="180" height="22" rx="11" fill="none" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="260" y="132" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#f59e0b">Oracle Security List → iptables</text>
+
+  <!-- Nginx box -->
+  <rect x="60" y="150" width="400" height="90" rx="12" fill="url(#grad-nginx)" stroke="#059669" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="260" y="182" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#047857">⚡ Nginx</text>
+  <text x="260" y="202" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#059669">Reverse proxy · SSL termination · WebSocket</text>
+  <text x="260" y="222" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#059669">Static file caching · Host headers</text>
+
+  <!-- Arrow 2 -->
+  <line x1="260" y1="243" x2="260" y2="277" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)" stroke-dasharray="5,3"/>
+  <text x="275" y="263" font-family="Inter,sans-serif" font-size="10" fill="#94a3b8">localhost:8069</text>
+
+  <!-- Loopback badge -->
+  <rect x="168" y="248" width="184" height="22" rx="11" fill="none" stroke="#714B67" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="260" y="262" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#714B67">127.0.0.1 — never exposed publicly</text>
+
+  <!-- Odoo box -->
+  <rect x="60" y="280" width="400" height="110" rx="12" fill="url(#grad-odoo)" stroke="#714B67" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="260" y="312" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#5c3d54">📦 Odoo</text>
+  <text x="260" y="332" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#714B67">Community + Enterprise · Python venv</text>
+  <text x="260" y="352" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#714B67">systemd managed · /opt/odoo</text>
+  <text x="260" y="372" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#714B67">/etc/odoo/odoo.conf · proxy_mode = True</text>
+
+  <!-- Arrow 3 -->
+  <line x1="260" y1="393" x2="260" y2="427" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)" stroke-dasharray="5,3"/>
+  <text x="275" y="413" font-family="Inter,sans-serif" font-size="10" fill="#94a3b8">socket auth</text>
+
+  <!-- PostgreSQL box -->
+  <rect x="60" y="430" width="400" height="90" rx="12" fill="url(#grad-pg)" stroke="#2563eb" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="260" y="462" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#1d4ed8">🐘 PostgreSQL</text>
+  <text x="260" y="482" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#2563eb">Local socket auth · odoo user</text>
+  <text x="260" y="502" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#2563eb">No exposed network port</text>
+
+  <!-- Footer note -->
+  <text x="260" y="545" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#94a3b8">Odoo On-Premise Deployment Architecture · Oracle Cloud Ubuntu 24.04</text>
+</svg>

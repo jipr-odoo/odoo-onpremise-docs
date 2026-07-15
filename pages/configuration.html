@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configure Odoo — Odoo On-Premise</title>
+  <meta name="description" content="Create the odoo.conf production configuration file with proxy_mode, http_interface, memory limits, dbfilter, and addons_path settings.">
+  <script>(function(){var t=localStorage.getItem('odoo-docs-theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/code.css">
+  <link rel="stylesheet" href="../assets/css/dark.css">
+</head>
+<body>
+<header class="doc-header" role="banner">
+  <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <a class="header-brand" href="../index.html" aria-label="Odoo Docs Home"><svg class="brand-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#714B67"/><path d="M8 22V10h4.5a4.5 4.5 0 010 9H12v3H8zm4-5.5h.5a2 2 0 000-4H12v4z" fill="white"/><circle cx="21" cy="19" r="3.5" fill="white"/><path d="M19.5 10h3v7a3.5 3.5 0 01-3.5 3.5H19V10h.5z" fill="white" opacity="0.7"/></svg><span class="brand-title">Odoo On-Premise</span></a>
+  <span class="header-version"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>v18 · Ubuntu 24.04</span>
+  <div class="header-search"><div class="search-box" role="search"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" class="search-input" placeholder="Search docs… (/ or Ctrl+K)" aria-label="Search documentation" autocomplete="off" spellcheck="false"><div class="search-shortcut" aria-hidden="true"><kbd>/</kbd></div><div class="search-results" role="listbox" aria-label="Search results"></div></div></div>
+  <div class="header-actions"><button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode (D)"><svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div>
+</header>
+<div class="sidebar-backdrop" aria-hidden="true"></div>
+<div class="doc-shell">
+  <aside class="doc-sidebar" aria-label="Documentation navigation"></aside>
+  <div class="doc-content">
+    <div class="doc-content-inner">
+      <main class="doc-article" id="main-content">
+
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="../index.html">Home</a><span class="sep" aria-hidden="true">›</span>
+          <span>Deployment</span><span class="sep" aria-hidden="true">›</span>
+          <span class="current">Configure Odoo</span>
+        </nav>
+
+        <header class="page-header">
+          <span class="page-category">Deployment · Chapter 3</span>
+          <h1>Configure Odoo</h1>
+          <p class="page-description">Create a clean, production-ready <code>odoo.conf</code> that binds Odoo to localhost, trusts the Nginx proxy, and restricts database access.</p>
+          <div class="page-meta">
+            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Estimated time: 10 minutes</span>
+          </div>
+        </header>
+
+        <section id="conf">
+          <h2>Create the Configuration File</h2>
+          <p>Create the configuration directory and open the main configuration file in your editor of choice.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo mkdir -p /etc/odoo
+sudo nano /etc/odoo/odoo.conf</pre></div>
+
+          <p>Paste the following production-ready configuration.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">ini</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>[options]
+
+admin_passwd = CHANGE_ME
+
+db_user = odoo
+
+addons_path = /opt/odoo/community/addons,/opt/odoo/custom,/opt/odoo/enterprise
+
+logfile = /opt/odoo/logs/odoo.log
+
+proxy_mode = True
+http_interface = 127.0.0.1
+
+workers = 0
+max_cron_threads = 1
+
+dbfilter = ^master$
+list_db = False
+
+limit_memory_soft = 268435456
+limit_memory_hard = 536870912
+
+limit_time_cpu = 120
+limit_time_real = 240</pre></div>
+
+          <div class="warning">
+            <strong>Change the admin password</strong>
+            <p>Replace <code>CHANGE_ME</code> with a strong, unique password. This password controls access to the Odoo database manager. Keep this file readable only by the <code>odoo</code> user.</p>
+          </div>
+
+          <p>Set correct file permissions.</p>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo chown odoo:odoo /etc/odoo/odoo.conf
+sudo chmod 640 /etc/odoo/odoo.conf</pre></div>
+        </section>
+
+        <section id="options">
+          <h2>Configuration Option Reference</h2>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Option</th><th>Value</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td><code>proxy_mode</code></td><td><code>True</code></td><td>Trust <code>X-Forwarded-*</code> headers sent by Nginx. Required for HTTPS to work correctly.</td></tr>
+                <tr><td><code>http_interface</code></td><td><code>127.0.0.1</code></td><td>Bind Odoo to localhost only. Prevents direct public access to port 8069.</td></tr>
+                <tr><td><code>addons_path</code></td><td>comma-separated paths</td><td>Directories where Odoo looks for addons. Order matters: Community → Custom → Enterprise.</td></tr>
+                <tr><td><code>dbfilter</code></td><td>regex</td><td>Restrict Odoo to databases matching this regular expression. Prevents accidental exposure of other databases.</td></tr>
+                <tr><td><code>list_db</code></td><td><code>False</code></td><td>Hide the database selector page from the login screen.</td></tr>
+                <tr><td><code>workers</code></td><td><code>0</code></td><td>Use single-threaded mode. Set to <code>2</code> or more for multi-process mode on larger servers.</td></tr>
+                <tr><td><code>max_cron_threads</code></td><td><code>1</code></td><td>Number of threads dedicated to scheduled actions.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="db">
+          <h2>Database Configuration</h2>
+          <p>
+            Because this guide uses Unix socket authentication (peer auth), no TCP database credentials
+            are required. The following options can be omitted or left blank.
+          </p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>db_host =
+db_port =
+db_password =</pre></div>
+
+          <div class="note">
+            <strong>Local socket authentication</strong>
+            <p>
+              PostgreSQL peer authentication allows the <code>odoo</code> OS user to connect to the
+              <code>odoo</code> PostgreSQL role via a Unix domain socket without a password.
+              This simplifies configuration and avoids storing credentials in the config file.
+            </p>
+          </div>
+        </section>
+
+        <section id="memory">
+          <h2>Memory Tuning</h2>
+          <p>The values in this guide are suitable for a small Oracle Cloud Free Tier VM with approximately 1 GB RAM.</p>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Option</th><th>Value</th><th>Meaning</th></tr></thead>
+              <tbody>
+                <tr><td><code>limit_memory_soft</code></td><td>268 MB</td><td>Worker is recycled when it exceeds this threshold</td></tr>
+                <tr><td><code>limit_memory_hard</code></td><td>512 MB</td><td>Worker is killed immediately if it exceeds this threshold</td></tr>
+                <tr><td><code>limit_time_cpu</code></td><td>120 s</td><td>Maximum CPU time per request</td></tr>
+                <tr><td><code>limit_time_real</code></td><td>240 s</td><td>Maximum wall-clock time per request</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="warning">
+            <strong>Production servers</strong>
+            <p>For production servers with more RAM, increase <code>limit_memory_soft</code> and <code>limit_memory_hard</code> proportionally. Enable multi-process mode by setting <code>workers</code> to 2–4 per CPU core.</p>
+          </div>
+        </section>
+
+        <section id="verify">
+          <h2>Verification</h2>
+          <p>Test the configuration by starting Odoo manually before creating the systemd service.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo -u odoo /opt/odoo/venv/bin/python3 /opt/odoo/community/odoo-bin \
+    -c /etc/odoo/odoo.conf --stop-after-init</pre></div>
+
+          <p>After the systemd service is created, verify it like this.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo systemctl restart odoo
+sudo systemctl status odoo --no-pager
+tail -50 /opt/odoo/logs/odoo.log</pre></div>
+
+          <ul class="verify-list">
+            <li><span class="tick">✓</span> Configuration file created at <code>/etc/odoo/odoo.conf</code></li>
+            <li><span class="tick">✓</span> <code>admin_passwd</code> changed from the default</li>
+            <li><span class="tick">✓</span> <code>proxy_mode = True</code> is set</li>
+            <li><span class="tick">✓</span> <code>http_interface = 127.0.0.1</code> is set</li>
+            <li><span class="tick">✓</span> <code>addons_path</code> includes Enterprise</li>
+            <li><span class="tick">✓</span> File permissions: owner <code>odoo</code>, mode <code>640</code></li>
+          </ul>
+        </section>
+
+        <nav class="page-nav" aria-label="Chapter navigation">
+          <a class="page-nav-item prev" href="odoo.html"><span class="nav-label">← Previous</span><span class="nav-title">Install Odoo</span></a>
+          <a class="page-nav-item next" href="systemd.html"><span class="nav-label">Next →</span><span class="nav-title">systemd Service</span></a>
+        </nav>
+        <a class="back-to-top" href="#main-content"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>Back to top</a>
+
+      </main>
+      <div class="doc-toc-column" aria-label="Page table of contents"></div>
+    </div>
+  </div>
+</div>
+<script src="../assets/js/darkmode.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/search.js"></script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+/* ============================================================
+   dark.css — Additional dark mode refinements
+   ============================================================ */
+
+/* ── Code block header in dark mode ── */
+[data-theme="dark"] .code-block {
+  box-shadow: 0 4px 16px rgba(0,0,0,.5);
+}
+
+/* ── Header scroll shadow ── */
+.doc-header.scrolled {
+  box-shadow: 0 2px 12px rgba(0,0,0,.1);
+}
+[data-theme="dark"] .doc-header.scrolled {
+  box-shadow: 0 2px 12px rgba(0,0,0,.4);
+}
+
+/* ── Table zebra stripes in dark mode ── */
+[data-theme="dark"] thead {
+  background: var(--clr-bg-subtle);
+}
+[data-theme="dark"] tbody tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--clr-bg-subtle) 50%, transparent);
+}
+[data-theme="dark"] tbody tr:hover td {
+  background: var(--clr-bg-muted);
+}
+
+/* ── Card hover in dark mode ── */
+[data-theme="dark"] .card {
+  background: var(--clr-surface);
+}
+[data-theme="dark"] .card:hover {
+  background: var(--clr-bg-subtle);
+}
+
+/* ── Nav card in dark mode ── */
+[data-theme="dark"] .nav-card {
+  background: var(--clr-surface);
+}
+[data-theme="dark"] .nav-card:hover {
+  background: var(--clr-bg-subtle);
+}
+
+/* ── Page nav item in dark mode ── */
+[data-theme="dark"] .page-nav-item {
+  background: var(--clr-surface);
+}
+[data-theme="dark"] .page-nav-item:hover {
+  background: var(--clr-bg-subtle);
+}
+
+/* ── Sidebar active link in dark mode ── */
+[data-theme="dark"] .sidebar-link.active {
+  background: color-mix(in srgb, var(--clr-primary) 15%, transparent);
+}
+
+/* ── Search input in dark mode ── */
+[data-theme="dark"] .search-input {
+  background: var(--clr-bg-subtle);
+  color: var(--clr-text);
+}
+[data-theme="dark"] .search-input:focus {
+  background: var(--clr-bg);
+  box-shadow: 0 0 0 3px rgba(196, 154, 189, 0.2);
+}
+
+/* ── Callout border-left legacy variants dark mode ── */
+[data-theme="dark"] .note {
+  background: rgba(88, 166, 255, 0.08);
+}
+[data-theme="dark"] .tip {
+  background: rgba(86, 211, 100, 0.08);
+}
+[data-theme="dark"] .warning {
+  background: rgba(210, 153, 34, 0.08);
+}
+[data-theme="dark"] .danger {
+  background: rgba(248, 81, 73, 0.08);
+}
+
+/* ── Breadcrumb separator in dark mode ── */
+[data-theme="dark"] .breadcrumbs .sep {
+  color: var(--clr-border-strong);
+}
+
+/* ── Verify list tick in dark mode ── */
+[data-theme="dark"] .verify-list .tick {
+  background: rgba(56, 211, 100, 0.12);
+}
+
+/* ── Scrollbar in dark mode ── */
+[data-theme="dark"] {
+  scrollbar-color: var(--clr-border) transparent;
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--clr-border);
+}
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ── Badge in dark mode ── */
+[data-theme="dark"] .badge-purple {
+  background: color-mix(in srgb, var(--clr-primary) 18%, transparent);
+}
+[data-theme="dark"] .badge-neutral {
+  background: var(--clr-bg-muted);
+}
+
+/* ── Diagram container in dark mode ── */
+[data-theme="dark"] .diagram-container img {
+  filter: brightness(0.9);
+}
+
+/* ── Table wrapper in dark mode ── */
+[data-theme="dark"] .table-wrapper {
+  box-shadow: none;
+  border-color: var(--clr-border);
+}
+
+/* ── Page header border in dark mode ── */
+[data-theme="dark"] .page-header {
+  border-color: var(--clr-border);
+}
+
+/* ── h2 border in dark mode ── */
+[data-theme="dark"] .doc-article h2 {
+  border-color: var(--clr-border);
+}
+
+/* ── focus styles (accessibility) ── */
+:focus-visible {
+  outline: 2px solid var(--clr-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Selection color ── */
+::selection {
+  background: color-mix(in srgb, var(--clr-primary) 25%, transparent);
+  color: var(--clr-text);
+}

@@ -1,0 +1,217 @@
+/* ============================================================
+   code.css — Code blocks, copy button, syntax highlighting
+   ============================================================ */
+
+/* ── Code Block Wrapper ── */
+.code-block {
+  position: relative;
+  margin: var(--space-6) 0;
+  border-radius: var(--radius-md);
+  background: var(--clr-code-bg);
+  border: 1px solid var(--clr-code-border);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  /* Prevent the block from stretching beyond its containing column */
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* ── Code Header Bar ── */
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: color-mix(in srgb, var(--clr-code-bg) 80%, #000);
+  border-bottom: 1px solid var(--clr-code-border);
+}
+
+.code-lang {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--clr-primary-light);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ── Copy Button ── */
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.55);
+  cursor: pointer;
+  transition: all var(--transition);
+  letter-spacing: 0.02em;
+}
+
+.copy-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.85);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.copy-btn.copied {
+  background: rgba(30, 167, 90, 0.2);
+  border-color: rgba(30, 167, 90, 0.4);
+  color: #4ade80;
+}
+
+.copy-btn svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+/* ── Pre / Code ── */
+.code-block pre {
+  margin: 0;
+  padding: var(--space-5);
+  overflow-x: auto;
+  background: transparent;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+
+  /* Text styling — applied here so plain <pre> (no <code> child) is
+     styled correctly. These apply in BOTH light and dark mode. */
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--clr-code-text);   /* light text on dark code-bg — always */
+  white-space: pre;
+  tab-size: 2;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+
+.code-block pre::-webkit-scrollbar {
+  height: 5px;
+}
+.code-block pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+.code-block pre::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+}
+
+/* Only needed if a <code> element is explicitly used inside <pre> */
+.code-block pre code {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  background: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  white-space: inherit;
+  tab-size: inherit;
+}
+
+/* ── Bare pre (without wrapper) — legacy compat ── */
+pre:not(.code-block pre) {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  background: var(--clr-code-bg);
+  color: var(--clr-code-text);
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--clr-code-border);
+  overflow-x: auto;
+  margin: var(--space-6) 0;
+  box-shadow: var(--shadow-md);
+  white-space: pre;
+  tab-size: 2;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+  /* Critical: constrain within parent so it doesn't break page layout on mobile */
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* ── Syntax Highlight Tokens ── */
+.tok-comment  { color: #7d7088; font-style: italic; }
+.tok-string   { color: #a3e0b5; }
+.tok-keyword  { color: #c49abd; font-weight: 600; }
+.tok-number   { color: #f9b280; }
+.tok-operator { color: #8ec4e8; }
+.tok-fn       { color: #7db9e8; }
+.tok-var      { color: #e2dce8; }
+.tok-type     { color: #daa9d6; }
+.tok-builtin  { color: #89dceb; }
+.tok-path     { color: #b5e8b0; }
+.tok-flag     { color: #f5c2b0; }
+.tok-option   { color: #f5e0b0; }
+.tok-value    { color: #a0d8b0; }
+.tok-section  { color: #c49abd; font-weight: 600; }
+.tok-key      { color: #8ec4e8; }
+.tok-prompt   { color: #7d7088; user-select: none; }
+
+/* ── Line numbers (optional) ── */
+.code-block.has-line-numbers pre code {
+  display: grid;
+  counter-reset: line;
+}
+.code-block.has-line-numbers pre code .line {
+  display: block;
+  padding-left: 3.5em;
+  position: relative;
+}
+.code-block.has-line-numbers pre code .line::before {
+  counter-increment: line;
+  content: counter(line);
+  position: absolute;
+  left: 0;
+  width: 2.5em;
+  text-align: right;
+  color: rgba(255,255,255,0.2);
+  padding-right: 1em;
+  user-select: none;
+  font-size: 0.8em;
+}
+
+/* ── Highlighted lines ── */
+.code-block pre .line-highlight {
+  display: block;
+  background: rgba(113, 75, 103, 0.15);
+  border-left: 3px solid var(--clr-primary-light);
+  margin: 0 calc(-1 * var(--space-5));
+  padding: 0 var(--space-5);
+}
+
+/* ── Terminal / Shell style ── */
+.code-block.shell pre code::before {
+  content: none;
+}
+
+/* Shell prompt line indicator */
+.code-block.shell .tok-prompt {
+  color: rgba(255,255,255,0.25);
+  margin-right: 8px;
+}
+
+/* ── Mobile: slightly smaller mono font for readability ── */
+@media (max-width: 600px) {
+  .code-block pre code,
+  pre:not(.code-block pre) {
+    font-size: 0.8rem;
+  }
+
+  /* Ensure the scroll indicator is always visible on mobile */
+  .code-block pre::-webkit-scrollbar,
+  pre:not(.code-block pre)::-webkit-scrollbar {
+    height: 4px;
+  }
+}

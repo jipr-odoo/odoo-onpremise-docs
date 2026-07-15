@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>systemd Service — Odoo On-Premise</title>
+  <meta name="description" content="Create an Odoo systemd service unit for automatic startup, crash recovery, and centralized logging with journalctl.">
+  <script>(function(){var t=localStorage.getItem('odoo-docs-theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/code.css">
+  <link rel="stylesheet" href="../assets/css/dark.css">
+</head>
+<body>
+<header class="doc-header" role="banner">
+  <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <a class="header-brand" href="../index.html" aria-label="Odoo Docs Home"><svg class="brand-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#714B67"/><path d="M8 22V10h4.5a4.5 4.5 0 010 9H12v3H8zm4-5.5h.5a2 2 0 000-4H12v4z" fill="white"/><circle cx="21" cy="19" r="3.5" fill="white"/><path d="M19.5 10h3v7a3.5 3.5 0 01-3.5 3.5H19V10h.5z" fill="white" opacity="0.7"/></svg><span class="brand-title">Odoo On-Premise</span></a>
+  <span class="header-version"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>v18 · Ubuntu 24.04</span>
+  <div class="header-search"><div class="search-box" role="search"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" class="search-input" placeholder="Search docs… (/ or Ctrl+K)" aria-label="Search documentation" autocomplete="off" spellcheck="false"><div class="search-shortcut" aria-hidden="true"><kbd>/</kbd></div><div class="search-results" role="listbox" aria-label="Search results"></div></div></div>
+  <div class="header-actions"><button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode (D)"><svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div>
+</header>
+<div class="sidebar-backdrop" aria-hidden="true"></div>
+<div class="doc-shell">
+  <aside class="doc-sidebar" aria-label="Documentation navigation"></aside>
+  <div class="doc-content">
+    <div class="doc-content-inner">
+      <main class="doc-article" id="main-content">
+
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="../index.html">Home</a><span class="sep" aria-hidden="true">›</span>
+          <span>Deployment</span><span class="sep" aria-hidden="true">›</span>
+          <span class="current">systemd Service</span>
+        </nav>
+
+        <header class="page-header">
+          <span class="page-category">Deployment · Chapter 4</span>
+          <h1>Create the Odoo systemd Service</h1>
+          <p class="page-description">Run Odoo as a managed Linux service with automatic startup after reboots, crash recovery, and centralized logging via <code>journalctl</code>.</p>
+          <div class="page-meta">
+            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Estimated time: 5–10 minutes</span>
+          </div>
+        </header>
+
+        <section id="why">
+          <h2>Why use systemd?</h2>
+          <p>Running Odoo directly in the terminal means it stops when you close the SSH session. <code>systemd</code> solves this by managing Odoo as a proper Linux service.</p>
+
+          <div class="card-grid">
+            <div class="card"><div class="card-title">🔄 Auto-restart</div><div class="card-desc">Automatically restarts Odoo if it crashes or exits unexpectedly</div></div>
+            <div class="card"><div class="card-title">⚡ Boot startup</div><div class="card-desc">Starts Odoo automatically when the server reboots</div></div>
+            <div class="card"><div class="card-title">📋 Centralized logs</div><div class="card-desc">All output captured by <code>journalctl</code>, available system-wide</div></div>
+            <div class="card"><div class="card-title">🔒 Dependency ordering</div><div class="card-desc">Ensures PostgreSQL is running before Odoo starts</div></div>
+          </div>
+        </section>
+
+        <section id="service">
+          <h2>Create the Service File</h2>
+          <p>Create the systemd unit file at <code>/etc/systemd/system/odoo.service</code>.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo nano /etc/systemd/system/odoo.service</pre></div>
+
+          <p>Paste the following unit configuration.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">ini</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>[Unit]
+Description=Odoo
+Documentation=https://www.odoo.com/documentation
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+
+User=odoo
+Group=odoo
+
+WorkingDirectory=/opt/odoo/community
+Environment="PATH=/opt/odoo/venv/bin"
+
+ExecStart=/opt/odoo/venv/bin/python3 /opt/odoo/community/odoo-bin \
+    -c /etc/odoo/odoo.conf
+
+Restart=always
+RestartSec=5
+TimeoutStopSec=60
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target</pre></div>
+
+          <div class="tip">
+            <strong>Virtual environment in ExecStart</strong>
+            <p>Using the full path to the virtual environment's Python interpreter ensures Odoo always runs with the correct Python version and all installed packages, regardless of what is set in PATH.</p>
+          </div>
+
+          <h3>Directive Reference</h3>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Directive</th><th>Value</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td><code>After=postgresql.service</code></td><td>—</td><td>Start Odoo only after PostgreSQL is ready</td></tr>
+                <tr><td><code>Requires=postgresql.service</code></td><td>—</td><td>Stop Odoo if PostgreSQL stops</td></tr>
+                <tr><td><code>User / Group</code></td><td><code>odoo</code></td><td>Run the process as the non-root <code>odoo</code> user</td></tr>
+                <tr><td><code>Environment=PATH</code></td><td>venv bin dir</td><td>Ensure the virtual environment executables are used</td></tr>
+                <tr><td><code>Restart=always</code></td><td>—</td><td>Restart automatically after any exit</td></tr>
+                <tr><td><code>RestartSec=5</code></td><td>5 seconds</td><td>Wait 5 seconds before attempting restart</td></tr>
+                <tr><td><code>TimeoutStopSec=60</code></td><td>60 seconds</td><td>Allow up to 60 seconds for graceful shutdown</td></tr>
+                <tr><td><code>StandardOutput=journal</code></td><td>—</td><td>Send stdout to systemd journal (accessible via <code>journalctl</code>)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="enable">
+          <h2>Enable and Start the Service</h2>
+          <p>Reload systemd to pick up the new unit file, then enable and start the service.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo systemctl daemon-reload
+
+sudo systemctl enable odoo
+
+sudo systemctl start odoo</pre></div>
+
+          <h3>Useful Service Commands</h3>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo systemctl status odoo --no-pager
+
+sudo systemctl restart odoo
+
+sudo systemctl stop odoo
+
+journalctl -u odoo -n 50 --no-pager
+
+journalctl -u odoo -f</pre></div>
+        </section>
+
+        <section id="verify">
+          <h2>Verification</h2>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo systemctl is-enabled odoo
+sudo systemctl status odoo --no-pager
+curl -I http://127.0.0.1:8069/web/login</pre></div>
+
+          <ul class="verify-list">
+            <li><span class="tick">✓</span> <code>systemctl is-enabled odoo</code> returns <code>enabled</code></li>
+            <li><span class="tick">✓</span> <code>systemctl status odoo</code> shows <code>active (running)</code></li>
+            <li><span class="tick">✓</span> <code>curl</code> to port 8069 returns HTTP 200 or 303</li>
+            <li><span class="tick">✓</span> Logs visible via <code>journalctl -u odoo</code></li>
+          </ul>
+        </section>
+
+        <section id="troubleshooting">
+          <h2>Common Issues</h2>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Problem</th><th>Likely Cause</th><th>Resolution</th></tr></thead>
+              <tbody>
+                <tr><td>Service fails immediately</td><td>Incorrect <code>ExecStart</code> path</td><td>Verify the virtual environment Python path: <code>which python</code> inside <code>source venv/bin/activate</code></td></tr>
+                <tr><td>Permission denied</td><td>Wrong file ownership</td><td>Ensure <code>/opt/odoo</code> and <code>/etc/odoo</code> are owned by the <code>odoo</code> user</td></tr>
+                <tr><td>Python module missing</td><td>Wrong interpreter</td><td>Confirm <code>ExecStart</code> uses the venv Python, not <code>/usr/bin/python3</code></td></tr>
+                <tr><td>PostgreSQL not found</td><td>DB service not started</td><td>Run <code>sudo systemctl start postgresql</code> first</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="warning">
+            <strong>Never run Odoo as root</strong>
+            <p>Running Odoo as the <code>root</code> user is a significant security risk. Always use a dedicated <code>odoo</code> Linux user with only the minimum permissions required.</p>
+          </div>
+        </section>
+
+        <nav class="page-nav" aria-label="Chapter navigation">
+          <a class="page-nav-item prev" href="configuration.html"><span class="nav-label">← Previous</span><span class="nav-title">Configure Odoo</span></a>
+          <a class="page-nav-item next" href="nginx.html"><span class="nav-label">Next →</span><span class="nav-title">Nginx</span></a>
+        </nav>
+        <a class="back-to-top" href="#main-content"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>Back to top</a>
+
+      </main>
+      <div class="doc-toc-column" aria-label="Page table of contents"></div>
+    </div>
+  </div>
+</div>
+<script src="../assets/js/darkmode.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/search.js"></script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

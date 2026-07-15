@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appendix &amp; Quick Reference — Odoo On-Premise</title>
+  <meta name="description" content="Quick reference for Odoo on-premise deployments: complete odoo.conf, systemd commands, Nginx summary, daily admin commands, and full deployment checklist.">
+  <script>(function(){var t=localStorage.getItem('odoo-docs-theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/code.css">
+  <link rel="stylesheet" href="../assets/css/dark.css">
+</head>
+<body>
+<header class="doc-header" role="banner">
+  <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <a class="header-brand" href="../index.html" aria-label="Odoo Docs Home"><svg class="brand-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#714B67"/><path d="M8 22V10h4.5a4.5 4.5 0 010 9H12v3H8zm4-5.5h.5a2 2 0 000-4H12v4z" fill="white"/><circle cx="21" cy="19" r="3.5" fill="white"/><path d="M19.5 10h3v7a3.5 3.5 0 01-3.5 3.5H19V10h.5z" fill="white" opacity="0.7"/></svg><span class="brand-title">Odoo On-Premise</span></a>
+  <span class="header-version"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>v18 · Ubuntu 24.04</span>
+  <div class="header-search"><div class="search-box" role="search"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" class="search-input" placeholder="Search docs… (/ or Ctrl+K)" aria-label="Search documentation" autocomplete="off" spellcheck="false"><div class="search-shortcut" aria-hidden="true"><kbd>/</kbd></div><div class="search-results" role="listbox" aria-label="Search results"></div></div></div>
+  <div class="header-actions"><button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode (D)"><svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div>
+</header>
+<div class="sidebar-backdrop" aria-hidden="true"></div>
+<div class="doc-shell">
+  <aside class="doc-sidebar" aria-label="Documentation navigation"></aside>
+  <div class="doc-content">
+    <div class="doc-content-inner">
+      <main class="doc-article" id="main-content">
+
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="../index.html">Home</a><span class="sep" aria-hidden="true">›</span>
+          <span>Reference</span><span class="sep" aria-hidden="true">›</span>
+          <span class="current">Appendix</span>
+        </nav>
+
+        <header class="page-header">
+          <span class="page-category">Reference</span>
+          <h1>Appendix &amp; Quick Reference</h1>
+          <p class="page-description">
+            A bookmark-worthy quick reference containing the complete configuration files,
+            daily administration commands, and a comprehensive deployment checklist.
+          </p>
+        </header>
+
+        <div class="tip">
+          <strong>Bookmark this page</strong>
+          <p>This appendix consolidates the most frequently needed configurations and commands in one place. You will return to it often after deployment.</p>
+        </div>
+
+        <!-- Directory layout -->
+        <section id="layout">
+          <h2>Recommended Directory Layout</h2>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">tree</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>/opt/odoo/
+├── community/     ← Odoo Community (git)
+│   └── addons/    ← Built-in Community addons
+├── enterprise/    ← Odoo Enterprise (git)
+├── custom/        ← Your custom addons
+├── logs/
+│   └── odoo.log   ← Application log file
+└── venv/          ← Python virtual environment
+    └── bin/
+        ├── python3
+        └── pip</pre></div>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">tree</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>/etc/odoo/
+└── odoo.conf      ← Main configuration (mode 640, owner odoo)
+
+/etc/systemd/system/
+└── odoo.service   ← systemd unit file
+
+/etc/nginx/
+├── sites-available/
+│   └── odoo       ← Nginx virtual host config
+└── sites-enabled/
+    └── odoo       ← Symlink to sites-available/odoo
+
+/usr/local/bin/
+├── odoo-help
+├── odoo-status
+├── odoo-start
+├── odoo-stop
+├── odoo-restart
+└── odoo-log</pre></div>
+        </section>
+
+        <!-- odoo.conf -->
+        <section id="conf">
+          <h2>Complete <code>odoo.conf</code></h2>
+          <p>Production configuration for a small Oracle Cloud Free Tier VM with 1 GB RAM.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">ini</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>[options]
+
+admin_passwd = CHANGE_ME
+
+db_user = odoo
+
+addons_path = /opt/odoo/community/addons,/opt/odoo/custom,/opt/odoo/enterprise
+
+logfile = /opt/odoo/logs/odoo.log
+
+proxy_mode = True
+http_interface = 127.0.0.1
+
+workers = 0
+max_cron_threads = 1
+
+dbfilter = ^master$
+list_db = False
+
+limit_memory_soft = 268435456
+limit_memory_hard = 536870912
+limit_time_cpu = 120
+limit_time_real = 240</pre></div>
+        </section>
+
+        <!-- systemd service -->
+        <section id="service">
+          <h2>Complete systemd Unit File</h2>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">ini</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>[Unit]
+Description=Odoo
+Documentation=https://www.odoo.com/documentation
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=odoo
+Group=odoo
+WorkingDirectory=/opt/odoo/community
+Environment="PATH=/opt/odoo/venv/bin"
+ExecStart=/opt/odoo/venv/bin/python3 /opt/odoo/community/odoo-bin \
+    -c /etc/odoo/odoo.conf
+Restart=always
+RestartSec=5
+TimeoutStopSec=60
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target</pre></div>
+
+          <h3>systemd Commands</h3>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo systemctl daemon-reload
+sudo systemctl enable odoo
+sudo systemctl start odoo
+sudo systemctl stop odoo
+sudo systemctl restart odoo
+sudo systemctl status odoo --no-pager
+journalctl -u odoo -n 100 --no-pager
+journalctl -u odoo -f</pre></div>
+        </section>
+
+        <!-- Nginx -->
+        <section id="nginx">
+          <h2>Nginx Configuration Summary</h2>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Item</th><th>Detail</th></tr></thead>
+              <tbody>
+                <tr><td>Config file</td><td><code>/etc/nginx/sites-available/odoo</code></td></tr>
+                <tr><td>Symlink</td><td><code>/etc/nginx/sites-enabled/odoo</code></td></tr>
+                <tr><td>Odoo upstream</td><td><code>127.0.0.1:8069</code></td></tr>
+                <tr><td>Public ports</td><td>80 (HTTP redirect), 443 (HTTPS)</td></tr>
+                <tr><td>SSL certificates</td><td>Managed by Certbot / Let's Encrypt</td></tr>
+                <tr><td>WebSocket path</td><td><code>/websocket</code></td></tr>
+                <tr><td>Static caching</td><td><code>/web/static/</code> — 10 days</td></tr>
+                <tr><td>Max upload size</td><td>100 MB (<code>client_max_body_size</code>)</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo nginx -t
+sudo systemctl reload nginx
+sudo systemctl restart nginx
+sudo journalctl -u nginx -n 50 --no-pager</pre></div>
+        </section>
+
+        <!-- Daily commands -->
+        <section id="commands">
+          <h2>Daily Administration Commands</h2>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Task</th><th>Command</th></tr></thead>
+              <tbody>
+                <tr><td>Check all service status</td><td><code>sudo systemctl status odoo postgresql nginx --no-pager</code></td></tr>
+                <tr><td>Restart Odoo</td><td><code>odoo-restart</code> or <code>sudo systemctl restart odoo</code></td></tr>
+                <tr><td>View live Odoo log</td><td><code>odoo-log</code> or <code>tail -f /opt/odoo/logs/odoo.log</code></td></tr>
+                <tr><td>View systemd journal</td><td><code>journalctl -u odoo -n 100 --no-pager</code></td></tr>
+                <tr><td>Reload Nginx after config changes</td><td><code>sudo nginx -t &amp;&amp; sudo systemctl reload nginx</code></td></tr>
+                <tr><td>Test SSL renewal</td><td><code>sudo certbot renew --dry-run</code></td></tr>
+                <tr><td>Check open ports</td><td><code>sudo ss -tlnp</code></td></tr>
+                <tr><td>Check firewall rules</td><td><code>sudo iptables -L INPUT -n --line-numbers</code></td></tr>
+                <tr><td>Update Odoo (Community)</td><td><code>cd /opt/odoo/community &amp;&amp; git pull</code></td></tr>
+                <tr><td>Check disk usage</td><td><code>df -h /opt/odoo</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Checklist -->
+        <section id="checklist">
+          <h2>Full Deployment Checklist</h2>
+          <p>Use this checklist to confirm a complete, successful deployment.</p>
+
+          <h3>Server Preparation</h3>
+          <ul class="verify-list">
+            <li><span class="tick">✓</span> Ubuntu 24.04 updated (<code>apt update &amp;&amp; apt upgrade</code>)</li>
+            <li><span class="tick">✓</span> System dependencies installed</li>
+            <li><span class="tick">✓</span> PostgreSQL installed and running</li>
+            <li><span class="tick">✓</span> <code>odoo</code> PostgreSQL role created</li>
+            <li><span class="tick">✓</span> <code>/opt/odoo</code> directory structure created</li>
+          </ul>
+
+          <h3>Odoo Installation</h3>
+          <ul class="verify-list">
+            <li><span class="tick">✓</span> Community repository cloned</li>
+            <li><span class="tick">✓</span> Enterprise repository cloned (same branch)</li>
+            <li><span class="tick">✓</span> Python virtual environment created</li>
+            <li><span class="tick">✓</span> Python dependencies installed (<code>requirements.txt</code>)</li>
+          </ul>
+
+          <h3>Configuration &amp; Service</h3>
+          <ul class="verify-list">
+            <li><span class="tick">✓</span> <code>/etc/odoo/odoo.conf</code> created with correct settings</li>
+            <li><span class="tick">✓</span> <code>admin_passwd</code> changed from default</li>
+            <li><span class="tick">✓</span> <code>proxy_mode = True</code> and <code>http_interface = 127.0.0.1</code> set</li>
+            <li><span class="tick">✓</span> <code>addons_path</code> includes Enterprise</li>
+            <li><span class="tick">✓</span> systemd service created, enabled and running</li>
+            <li><span class="tick">✓</span> Odoo accessible on <code>127.0.0.1:8069</code></li>
+          </ul>
+
+          <h3>Networking &amp; Security</h3>
+          <ul class="verify-list">
+            <li><span class="tick">✓</span> Nginx installed and configured as reverse proxy</li>
+            <li><span class="tick">✓</span> WebSocket location block configured</li>
+            <li><span class="tick">✓</span> Default Nginx site disabled</li>
+            <li><span class="tick">✓</span> DNS A record pointing to Oracle VM</li>
+            <li><span class="tick">✓</span> DNS propagation verified</li>
+            <li><span class="tick">✓</span> TLS certificate obtained from Let's Encrypt</li>
+            <li><span class="tick">✓</span> HTTP redirects to HTTPS</li>
+            <li><span class="tick">✓</span> Certbot auto-renewal configured (<code>certbot.timer</code> active)</li>
+            <li><span class="tick">✓</span> Oracle Security List: ports 22, 80, 443 open; 8069 closed</li>
+            <li><span class="tick">✓</span> iptables: ports 80, 443 allowed; rules saved persistently</li>
+            <li><span class="tick">✓</span> Port 8069 not accessible from Internet</li>
+          </ul>
+
+          <h3>Administration</h3>
+          <ul class="verify-list">
+            <li><span class="tick">✓</span> Helper commands installed in <code>/usr/local/bin</code></li>
+            <li><span class="tick">✓</span> Odoo accessible at <code>https://yourdomain.com</code></li>
+            <li><span class="tick">✓</span> Odoo login page loads correctly</li>
+          </ul>
+        </section>
+
+        <nav class="page-nav" aria-label="Chapter navigation">
+          <a class="page-nav-item prev" href="troubleshooting.html"><span class="nav-label">← Previous</span><span class="nav-title">Troubleshooting</span></a>
+          <a class="page-nav-item next" href="../index.html"><span class="nav-label">↩ Back to</span><span class="nav-title">Home</span></a>
+        </nav>
+        <a class="back-to-top" href="#main-content"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>Back to top</a>
+
+      </main>
+      <div class="doc-toc-column" aria-label="Page table of contents"></div>
+    </div>
+  </div>
+</div>
+<script src="../assets/js/darkmode.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/search.js"></script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

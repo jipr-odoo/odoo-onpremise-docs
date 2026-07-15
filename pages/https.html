@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTTPS with Let's Encrypt — Odoo On-Premise</title>
+  <meta name="description" content="Secure your Odoo deployment with a free TLS certificate from Let's Encrypt using Certbot and configure automatic renewal.">
+  <script>(function(){var t=localStorage.getItem('odoo-docs-theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/code.css">
+  <link rel="stylesheet" href="../assets/css/dark.css">
+</head>
+<body>
+<header class="doc-header" role="banner">
+  <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <a class="header-brand" href="../index.html" aria-label="Odoo Docs Home"><svg class="brand-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#714B67"/><path d="M8 22V10h4.5a4.5 4.5 0 010 9H12v3H8zm4-5.5h.5a2 2 0 000-4H12v4z" fill="white"/><circle cx="21" cy="19" r="3.5" fill="white"/><path d="M19.5 10h3v7a3.5 3.5 0 01-3.5 3.5H19V10h.5z" fill="white" opacity="0.7"/></svg><span class="brand-title">Odoo On-Premise</span></a>
+  <span class="header-version"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>v18 · Ubuntu 24.04</span>
+  <div class="header-search"><div class="search-box" role="search"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" class="search-input" placeholder="Search docs… (/ or Ctrl+K)" aria-label="Search documentation" autocomplete="off" spellcheck="false"><div class="search-shortcut" aria-hidden="true"><kbd>/</kbd></div><div class="search-results" role="listbox" aria-label="Search results"></div></div></div>
+  <div class="header-actions"><button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode (D)"><svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div>
+</header>
+<div class="sidebar-backdrop" aria-hidden="true"></div>
+<div class="doc-shell">
+  <aside class="doc-sidebar" aria-label="Documentation navigation"></aside>
+  <div class="doc-content">
+    <div class="doc-content-inner">
+      <main class="doc-article" id="main-content">
+
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="../index.html">Home</a><span class="sep" aria-hidden="true">›</span>
+          <span>Deployment</span><span class="sep" aria-hidden="true">›</span>
+          <span class="current">HTTPS &amp; TLS</span>
+        </nav>
+
+        <header class="page-header">
+          <span class="page-category">Deployment · Chapter 7</span>
+          <h1>Enable HTTPS with Let's Encrypt</h1>
+          <p class="page-description">Obtain a free, trusted TLS certificate using Certbot and the Let's Encrypt ACME protocol. Configure automatic renewal so the certificate stays valid.</p>
+          <div class="page-meta">
+            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Estimated time: 10 minutes</span>
+            <span class="meta-item">Prerequisite: DNS propagation complete</span>
+          </div>
+        </header>
+
+        <section id="prereq">
+          <h2>Prerequisites</h2>
+          <p>All of the following must be true before running Certbot.</p>
+
+          <ul class="verify-list">
+            <li><span class="tick">✓</span> Your domain resolves to the Oracle VM's public IP address</li>
+            <li><span class="tick">✓</span> Nginx is installed and serving HTTP on port 80</li>
+            <li><span class="tick">✓</span> Port 80 is open in the Oracle Security List</li>
+            <li><span class="tick">✓</span> Port 80 is allowed in iptables</li>
+          </ul>
+
+          <div class="warning">
+            <strong>Do not skip prerequisites</strong>
+            <p>If DNS does not resolve to your server before running Certbot, the ACME HTTP-01 challenge will fail. Let's Encrypt enforces rate limits, and too many failed attempts will temporarily block certificate issuance for your domain.</p>
+          </div>
+        </section>
+
+        <section id="install">
+          <h2>Install Certbot</h2>
+          <p>Install Certbot and the Nginx plugin from the Ubuntu repositories.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo apt update
+sudo apt install -y certbot python3-certbot-nginx</pre></div>
+
+          <p>Certbot's Nginx plugin will automatically detect your Nginx virtual hosts and modify the configuration to add SSL directives after the certificate is issued.</p>
+        </section>
+
+        <section id="certificate">
+          <h2>Request a Certificate</h2>
+          <p>Run Certbot with the Nginx plugin. It will automatically detect the Nginx <code>server_name</code> and perform the ACME HTTP-01 challenge.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo certbot --nginx</pre></div>
+
+          <p>The interactive wizard will ask you to:</p>
+
+          <ol>
+            <li>Enter a valid email address (used for expiry notifications)</li>
+            <li>Accept the Let's Encrypt Terms of Service</li>
+            <li>Choose whether to share your email with EFF (optional)</li>
+            <li>Select the domain(s) to secure (from the detected Nginx server names)</li>
+            <li>Choose whether to redirect HTTP traffic to HTTPS automatically</li>
+          </ol>
+
+          <div class="tip">
+            <strong>Select redirect</strong>
+            <p>Select <strong>2 (Redirect)</strong> when prompted to redirect HTTP to HTTPS. This ensures all traffic is always encrypted and your Nginx configuration is automatically updated.</p>
+          </div>
+
+          <p>After completion, Certbot modifies your Nginx configuration to include the certificate paths and SSL directives, then reloads Nginx automatically.</p>
+        </section>
+
+        <section id="renew">
+          <h2>Automatic Renewal</h2>
+          <p>Let's Encrypt certificates are valid for 90 days. Certbot installs a systemd timer that runs twice daily to check and renew certificates that are due to expire within 30 days.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>systemctl list-timers | grep certbot</pre></div>
+
+          <p>Test the renewal process without actually issuing a new certificate.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo certbot renew --dry-run</pre></div>
+
+          <div class="note">
+            <strong>No action needed</strong>
+            <p>The Certbot systemd timer is enabled and started automatically during installation. As long as ports 80 and 443 remain accessible and DNS continues to resolve correctly, renewal will happen automatically without any manual intervention.</p>
+          </div>
+        </section>
+
+        <section id="verify">
+          <h2>Verification</h2>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>curl -Ik https://example.com
+
+sudo nginx -t
+
+sudo systemctl reload nginx</pre></div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Check</th><th>Expected Result</th></tr></thead>
+              <tbody>
+                <tr><td>HTTPS loads</td><td>Browser shows a padlock icon</td></tr>
+                <tr><td>Certificate valid</td><td>Issued by Let's Encrypt</td></tr>
+                <tr><td>HTTP redirects to HTTPS</td><td><code>curl http://</code> returns 301 to <code>https://</code></td></tr>
+                <tr><td>Automatic renewal configured</td><td><code>certbot.timer</code> listed as active</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="issues">
+          <h2>Common Issues</h2>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Problem</th><th>Resolution</th></tr></thead>
+              <tbody>
+                <tr><td>Connection timed out during challenge</td><td>Verify port 80 is open in the Oracle Security List and iptables. See Chapter 8.</td></tr>
+                <tr><td>ACME challenge failed</td><td>Ensure DNS resolves to the correct public IP. Test with <code>dig @8.8.8.8 example.com</code>.</td></tr>
+                <tr><td>Certificate not renewing</td><td>Check <code>sudo systemctl status certbot.timer</code> and run a dry-run manually.</td></tr>
+                <tr><td>Browser still shows HTTP / no padlock</td><td>Clear browser cache, or check whether the HTTP→HTTPS redirect is active in the Nginx config.</td></tr>
+                <tr><td>Too many requests error</td><td>You've hit the Let's Encrypt rate limit. Wait 1 hour before retrying, or use the <code>--staging</code> flag for testing.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <nav class="page-nav" aria-label="Chapter navigation">
+          <a class="page-nav-item prev" href="domain.html"><span class="nav-label">← Previous</span><span class="nav-title">Domain Configuration</span></a>
+          <a class="page-nav-item next" href="firewall.html"><span class="nav-label">Next →</span><span class="nav-title">Firewall</span></a>
+        </nav>
+        <a class="back-to-top" href="#main-content"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>Back to top</a>
+
+      </main>
+      <div class="doc-toc-column" aria-label="Page table of contents"></div>
+    </div>
+  </div>
+</div>
+<script src="../assets/js/darkmode.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/search.js"></script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

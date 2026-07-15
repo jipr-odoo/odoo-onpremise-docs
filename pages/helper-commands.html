@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Helper Commands — Odoo On-Premise</title>
+  <meta name="description" content="Create convenient shell scripts for day-to-day Odoo server administration including status, start, stop, restart, and log viewing.">
+  <script>(function(){var t=localStorage.getItem('odoo-docs-theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/code.css">
+  <link rel="stylesheet" href="../assets/css/dark.css">
+</head>
+<body>
+<header class="doc-header" role="banner">
+  <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <a class="header-brand" href="../index.html" aria-label="Odoo Docs Home"><svg class="brand-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#714B67"/><path d="M8 22V10h4.5a4.5 4.5 0 010 9H12v3H8zm4-5.5h.5a2 2 0 000-4H12v4z" fill="white"/><circle cx="21" cy="19" r="3.5" fill="white"/><path d="M19.5 10h3v7a3.5 3.5 0 01-3.5 3.5H19V10h.5z" fill="white" opacity="0.7"/></svg><span class="brand-title">Odoo On-Premise</span></a>
+  <span class="header-version"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>v18 · Ubuntu 24.04</span>
+  <div class="header-search"><div class="search-box" role="search"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" class="search-input" placeholder="Search docs… (/ or Ctrl+K)" aria-label="Search documentation" autocomplete="off" spellcheck="false"><div class="search-shortcut" aria-hidden="true"><kbd>/</kbd></div><div class="search-results" role="listbox" aria-label="Search results"></div></div></div>
+  <div class="header-actions"><button class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode (D)"><svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div>
+</header>
+<div class="sidebar-backdrop" aria-hidden="true"></div>
+<div class="doc-shell">
+  <aside class="doc-sidebar" aria-label="Documentation navigation"></aside>
+  <div class="doc-content">
+    <div class="doc-content-inner">
+      <main class="doc-article" id="main-content">
+
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="../index.html">Home</a><span class="sep" aria-hidden="true">›</span>
+          <span>Administration</span><span class="sep" aria-hidden="true">›</span>
+          <span class="current">Helper Commands</span>
+        </nav>
+
+        <header class="page-header">
+          <span class="page-category">Administration</span>
+          <h1>Helper Commands</h1>
+          <p class="page-description">
+            Create a small, consistent set of shell scripts for daily Odoo administration.
+            These wrappers reduce the chance of typos and make common tasks fast to execute from any directory.
+          </p>
+          <div class="page-meta">
+            <span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Estimated time: 5–10 minutes</span>
+          </div>
+        </header>
+
+        <!-- Overview -->
+        <section id="overview">
+          <h2>Overview</h2>
+          <p>
+            Day-to-day Odoo administration involves repeating the same <code>systemctl</code> and <code>journalctl</code>
+            commands. Placing short wrapper scripts in <code>/usr/local/bin</code> makes them available
+            system-wide without needing to remember full command syntax.
+          </p>
+
+          <div class="tip">
+            <strong>Why <code>/usr/local/bin</code>?</strong>
+            <p>
+              Scripts placed in <code>/usr/local/bin</code> are on the default <code>PATH</code> for all users.
+              They can be executed from any directory without a path prefix.
+            </p>
+          </div>
+        </section>
+
+        <!-- Command Reference -->
+        <section id="aliases">
+          <h2>Command Reference</h2>
+
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Command</th><th>Description</th><th>Underlying Command</th></tr></thead>
+              <tbody>
+                <tr><td><code>odoo-help</code></td><td>Display all available helper commands</td><td>Prints a usage summary</td></tr>
+                <tr><td><code>odoo-status</code></td><td>Show the Odoo service status</td><td><code>sudo systemctl status odoo --no-pager</code></td></tr>
+                <tr><td><code>odoo-start</code></td><td>Start the Odoo service</td><td><code>sudo systemctl start odoo</code></td></tr>
+                <tr><td><code>odoo-stop</code></td><td>Stop the Odoo service</td><td><code>sudo systemctl stop odoo</code></td></tr>
+                <tr><td><code>odoo-restart</code></td><td>Restart the Odoo service</td><td><code>sudo systemctl restart odoo</code></td></tr>
+                <tr><td><code>odoo-log</code></td><td>Follow the Odoo log in real time</td><td><code>tail -f /opt/odoo/logs/odoo.log</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Installation -->
+        <section id="install">
+          <h2>Create the Scripts</h2>
+          <p>Create each script as a plain text file, add a shebang line, and make it executable.</p>
+
+          <h3>odoo-help</h3>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo tee /usr/local/bin/odoo-help > /dev/null &lt;&lt;'EOF'
+#!/bin/bash
+echo "Odoo Administration Helper Commands"
+echo "────────────────────────────────────"
+echo "  odoo-status   Show service status"
+echo "  odoo-start    Start the service"
+echo "  odoo-stop     Stop the service"
+echo "  odoo-restart  Restart the service"
+echo "  odoo-log      Follow the log file"
+EOF
+sudo chmod +x /usr/local/bin/odoo-help</pre></div>
+
+          <h3>odoo-status</h3>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo tee /usr/local/bin/odoo-status > /dev/null &lt;&lt;'EOF'
+#!/bin/bash
+sudo systemctl status odoo --no-pager
+EOF
+sudo chmod +x /usr/local/bin/odoo-status</pre></div>
+
+          <h3>odoo-start</h3>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo tee /usr/local/bin/odoo-start > /dev/null &lt;&lt;'EOF'
+#!/bin/bash
+sudo systemctl start odoo
+echo "Odoo started."
+EOF
+sudo chmod +x /usr/local/bin/odoo-start</pre></div>
+
+          <h3>odoo-stop</h3>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo tee /usr/local/bin/odoo-stop > /dev/null &lt;&lt;'EOF'
+#!/bin/bash
+sudo systemctl stop odoo
+echo "Odoo stopped."
+EOF
+sudo chmod +x /usr/local/bin/odoo-stop</pre></div>
+
+          <h3>odoo-restart</h3>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo tee /usr/local/bin/odoo-restart > /dev/null &lt;&lt;'EOF'
+#!/bin/bash
+sudo systemctl restart odoo
+echo "Odoo restarted."
+EOF
+sudo chmod +x /usr/local/bin/odoo-restart</pre></div>
+
+          <h3>odoo-log</h3>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>sudo tee /usr/local/bin/odoo-log > /dev/null &lt;&lt;'EOF'
+#!/bin/bash
+tail -f /opt/odoo/logs/odoo.log
+EOF
+sudo chmod +x /usr/local/bin/odoo-log</pre></div>
+        </section>
+
+        <!-- Usage -->
+        <section id="usage">
+          <h2>Example Usage</h2>
+          <p>After installation, all commands are immediately available from any directory.</p>
+
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre># Display available helper commands
+odoo-help
+
+# Check if Odoo is running
+odoo-status
+
+# Restart after a configuration change
+odoo-restart
+
+# Follow the live log output
+odoo-log</pre></div>
+
+          <div class="note">
+            <strong>These are convenience wrappers</strong>
+            <p>
+              The helper commands wrap standard Linux utilities. They do not replace
+              <code>systemctl</code> or <code>journalctl</code> — they just make the most common
+              operations faster and less error-prone during daily administration.
+            </p>
+          </div>
+        </section>
+
+        <!-- Verification -->
+        <section id="verify">
+          <h2>Verification</h2>
+<div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button type="button" class="copy-btn" aria-label="Copy code to clipboard" title="Copy code" onclick="copyCode(this)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="9" height="9" rx="1.5"/><path d="M10.5 5.5V3A1.5 1.5 0 009 1.5H3A1.5 1.5 0 001.5 3v6A1.5 1.5 0 003 10.5h2.5"/></svg><span class="copy-label">Copy</span></button></div><pre>which odoo-help
+odoo-help
+odoo-status</pre></div>
+
+          <ul class="verify-list">
+            <li><span class="tick">✓</span> <code>which odoo-help</code> returns <code>/usr/local/bin/odoo-help</code></li>
+            <li><span class="tick">✓</span> All scripts are executable (<code>ls -la /usr/local/bin/odoo-*</code>)</li>
+            <li><span class="tick">✓</span> <code>odoo-status</code> shows the current service state</li>
+            <li><span class="tick">✓</span> <code>odoo-restart</code> successfully restarts the service</li>
+            <li><span class="tick">✓</span> <code>odoo-log</code> shows log output</li>
+          </ul>
+        </section>
+
+        <nav class="page-nav" aria-label="Chapter navigation">
+          <a class="page-nav-item prev" href="firewall.html"><span class="nav-label">← Previous</span><span class="nav-title">Firewall</span></a>
+          <a class="page-nav-item next" href="troubleshooting.html"><span class="nav-label">Next →</span><span class="nav-title">Troubleshooting</span></a>
+        </nav>
+        <a class="back-to-top" href="#main-content"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>Back to top</a>
+
+      </main>
+      <div class="doc-toc-column" aria-label="Page table of contents"></div>
+    </div>
+  </div>
+</div>
+<script src="../assets/js/darkmode.js"></script>
+<script src="../assets/js/navigation.js"></script>
+<script src="../assets/js/toc.js"></script>
+<script src="../assets/js/search.js"></script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>
